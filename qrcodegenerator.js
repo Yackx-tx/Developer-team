@@ -5,16 +5,10 @@ const fs = require('fs');
 
 const processDataAndGenerateQRCode = async (data) => {
   try {
-    // Process the input data
-    const processedData = data.toUpperCase(); // Example: Convert data to uppercase
-
-    // Generate QR code
+    const processedData = data.toUpperCase();
     const qrCode = await QRCode.toDataURL(processedData, { errorCorrectionLevel: 'M', margin: 1, width: 200 });
-
-    // Save the QR code image
     const qrCodeImage = Buffer.from(qrCode.replace('data:image/png;base64,', ''), 'base64');
     fs.writeFileSync('qrcode.png', qrCodeImage);
-
     return processedData;
   } catch (error) {
     console.error('Error processing data:', error);
@@ -32,14 +26,10 @@ const decodeQRCode = async (filePath) => {
   }
 };
 
-// Input data
 const inputData = 'QR CODE generated';
-
-// Process data, generate QR code, and save the image
 processDataAndGenerateQRCode(inputData)
-  .then((processedData) => {
+ .then((processedData) => {
     if (processedData) {
-      // Decode the generated QR code
       decodeQRCode('qrcode.png');
     }
   });

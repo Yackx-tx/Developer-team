@@ -1,25 +1,35 @@
-const { QRCodeReader } = require('qrcode-reader');
-const fs = require('fs');
 const Jimp = require('jimp');
+const QRCode = require('qrcode');
+const jsQR = require('jsqr');
+const fs = require('fs');
 
-// Function to decode QR code from image
+const processDataAndGenerateQRCode = async (data) => {
+  try {
+    const processedData = data.toUpperCase();
+    const qrCode = await QRCode.toDataURL(processedData, { errorCorrectionLevel: 'M', margin: 1, width: 200 });
+    const qrCodeImage = Buffer.from(qrCode.replace('data:image/png;base64,', ''), 'base64');
+    fs.writeFileSync('qrcode.png', qrCodeImage);
+    return processedData;
+  } catch (error) {
+    console.error('Error processing data:', error);
+    return null;
+  }
+};
+
 const decodeQRCode = async (filePath) => {
   try {
     const image = await Jimp.read(filePath);
-    const qr = new QRCodeReader();
-    const qrCode = await qr.decode(image.bitmap.data, image.bitmap.width, image.bitmap.height);
-    if (qrCode) {
-      console.log('Decoded QR code:', qrCode.data);
-    } else {
-      console.log('QR code not found or could not be decoded.');
-    }
+    const qrCodeData = jsQR(image.bitmap.data, image.bitmap.width, image.bitmap.height);
+    console.log('Decoded data:', qrCodeData.data);
   } catch (error) {
     console.error('Error decoding QR code:', error);
   }
 };
 
-// Path to the QR code image to decode
-const qrCodeFilePath = 'qrcode.png';
-
-// Decode QR code
-decodeQRCode(qrCodeFilePath);
+const inputData = 'QR CODE generated';
+processDataAndGenerateQRCode(inputData)
+.then((processedData) => {
+    if (processedData) {
+      decodeQRCode('qrcode.png');
+    }
+  });
